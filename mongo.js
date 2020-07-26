@@ -11,7 +11,7 @@ const dbname='task-d'
 const collection='users'
 
 
-// insertone and many
+////insertone and many
 // Mclient.connect(conn,{useNewUrlParser : true, useUnifiedTopology: true },(error,client)=>{
 //     if(error){
 //         return console.log('unable to connect....')
@@ -36,7 +36,7 @@ const collection='users'
 // })
 
 
-//delete
+////delete
 // Mclient.connect(conn,{useNewUrlParser:true,useUnifiedTopology: true},(error,client)=>{
 //     if(error){
 //         return console.log('not able to connect')
@@ -52,7 +52,7 @@ const collection='users'
 
 
 
-//update
+////update
 // Mclient.connect(conn,{useNewUrlParser:true,useUnifiedTopology: true},(error,client)=>{
 //     if(error){
 //         console.log('unable to connect....')
