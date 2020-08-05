@@ -11,6 +11,20 @@ app.use(taskRoutes)
 
 app.listen(3000,()=>console.log('listning....'))
 
+// const Task=require('./task')
+// const User=require('./users')
+// const main=async ()=>{
+
+//     const user= await User.findById('5f2544175bcf6a23f8f24f94')
+//     // console.log(user)
+//     await user.populate('task').execPopulate()
+//     console.log(user.task) 
+
+//     // const task=await Task.findById('5f2544595bcf6a23f8f24f98');
+//     // await task.populate('owner').execPopulate()
+//     // console.log(task.owner)
+// }
+// main()
 // const myFunction=async()=>{
 //     const token=jwt.sign({email:'kattap@gmail.com'},'taskapp')
 //     console.log(token)

@@ -2,6 +2,7 @@ const express= require('express')
 const router =new express.Router()
 const Users=require('../users');
 const auth =require('../middleware/auth')
+const multer=require('multer')
 
 router.post('/users',async (req,res)=>{
     const user=new Users(req.body);
@@ -63,19 +64,19 @@ router.get('/users/me',auth ,async (req,res)=>{
     // })
 })
 
-router.get('/users/:id',(req,res)=>{
-    const _id=req.params.id;
-    Users.findById(_id).then((users)=>{
-        if(!users){
-            return res.status(404).send()
-        }
-        res.send(users)
-    }).catch((error)=>{
-        res.status(500).send(error)
-    })
-})
+// router.get('/users/:id',(req,res)=>{
+//     const _id=req.params.id;
+//     Users.findById(_id).then((users)=>{
+//         if(!users){
+//             return res.status(404).send()
+//         }
+//         res.send(users)
+//     }).catch((error)=>{
+//         res.status(500).send(error)
+//     })
+// })
 
-router.patch('/users/:id',(req,res)=>{
+router.patch('/users/me',auth,(req,res)=>{
     const _id=req.params.id
     const updates=Object.keys(req.body)
     const allowed=['name','email','password','age']
@@ -85,33 +86,76 @@ router.patch('/users/:id',(req,res)=>{
         return res.status(400).send({error:'invilad update'})
     }
 
-    Users.findById(_id).then((user)=>{
-        if(!user){
-            return res.status(404).send()
-        }
-        updates.forEach((update)=>user[update]=req.body[update])
-        user.save().then((user)=>{
-            res.send(user)
+
+        updates.forEach((update)=>req.user[update]=req.body[update])
+        req.user.save().then((user)=>{
+            res.send(req.user)
         }).catch((e)=>{
             res.status(400).send()
         })
         
-    })
+
     .catch((e)=>{
         res.status(400).send()
     })
 })
 
-router.delete('/users/:id',(req,res)=>{
-    let _id=req.params.id
-    Users.findByIdAndDelete(_id).then((user)=>{
-        if(!user){
-            return res.status(404).send()
+router.delete('/users/me',auth,async (req,res)=>{
+    // let _id=req.params.id
+    try{
+        await req.user.remove()
+        res.send(req.user)
+    }catch(e){
+        res.status(500).send() 
+    }
+})
+
+const upload=multer({
+    
+    limits:{
+        fileSize:1000000
+    },
+    fileFilter(req,file,cb){
+        if(!file.originalname.endsWith('.jpg')&&!file.originalname.endsWith('.png')){
+            return cb(new Error('please upload an image'))
         }
-        res.send(user)
-    }).catch((e)=>{
+        cb(null,true)
+    }
+})
+
+router.post('/users/me/avatar',auth,upload.single('avatar'),async (req,res)=>{
+    req.user.avatar=req.file.buffer
+    try{
+        await req.user.save()
+        res.send(req.user)
+    }catch(e){
         res.status(500).send()
-    })
+    }
+    // res.send()
+},(error,req,res,next)=>{
+    res.status(400).send({error:error.message})
+})
+
+router.delete('/users/me/avatar',auth,async(req,res)=>{
+    try{
+        req.user.avatar=undefined
+        await req.user.save()
+        res.send(req.user)
+    }catch(e){
+        res.status(500).send()
+    }
+})
+
+router.get('/users/avatar',auth,async(req,res)=>{
+    try{
+        if(!req.user.avatar){
+            throw Error()
+        }
+        res.set('Contant-Type','image/jpg')
+        res.send(req.user.avatar)
+    }catch(e){
+        res.status(404).send()
+    }
 })
 
 module.exports=router
